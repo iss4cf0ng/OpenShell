@@ -134,17 +134,18 @@ body{
     margin-right:4px;
 }
 
-.small-btn {
-  padding: 4px 10px;
-  font-size: 12px;
+.builder-btn {
+  width: 80px;
+  height: 30px;
+  font-size: 13px;
   cursor: pointer;
 }
 
 .builder-dialog {
-  background-color: #3a3a3a;
+  background: #3a3a3a;
   color: white;
-  border: none;
   border-radius: 6px;
+  border: none;
   padding: 20px;
 }
 
@@ -154,11 +155,21 @@ body{
   padding: 4px;
 }
 
+/* command box */
 #shellOutput {
-  margin-top: 10px;
+  margin-top: 12px;
   background: #1e1e1e;
-  padding: 8px;
+  padding: 10px;
   border-radius: 4px;
+
+  width: 350px;
+  height: 80px;
+
+  overflow-y: auto;
+  overflow-x: auto;
+
+  font-family: monospace;
+  font-size: 13px;
 }
 
 </style>
@@ -168,7 +179,7 @@ body{
 <div id="container">
 
     <!-- Builder menu -->
-    <button id="builderBtn" class="small-btn">Builder</button>
+    <button id="builderBtn" class="builder-btn">Builder</button>
 
     <dialog id="builderDialog" class="builder-dialog">
     <h3>Reverse Shell Builder</h3>
@@ -179,21 +190,29 @@ body{
         <option value="sh">sh</option>
         <option value="python">python</option>
         <option value="nc">netcat</option>
+        <option value="php">php</option>
+        <option value="perl">perl</option>
+        <option value="ruby">ruby</option>
+        <option value="powershell">powershell</option>
     </select>
+
     <br><br>
 
     <label>IP</label><br>
     <input id="builderIp" type="text" placeholder="127.0.0.1">
+
     <br><br>
 
     <label>Port</label><br>
     <input id="builderPort" type="number" placeholder="4444">
+
     <br><br>
 
     <button id="createShell">Create</button>
+    <button id="copyShell">Copy</button>
     <button id="closeBuilder">Close</button>
 
-    <pre id="shellOutput"></pre>
+    <div id="shellOutput"></div>
     </dialog>
 
     <!-- Session list -->
