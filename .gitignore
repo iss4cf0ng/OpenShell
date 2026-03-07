@@ -1,0 +1,6 @@
+# build output
+release/
+dist/
+*.tar.gz
+*.zip
+openshell-server

