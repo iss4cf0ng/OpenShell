@@ -12,8 +12,8 @@ It allows users to establish reverse shell channels and interact with them throu
 ⚠️ This project is currently under development. The first release is coming soon. Installation instructions will be provided after the first release.
 
 <p align="center">
-<img src="https://iss4cf0ng.github.io/images/meme/koyuki_crying.gif" width=250>
-  <figcaption>Waaahhhhhhh!</figcaption>
+  <img src="https://iss4cf0ng.github.io/images/meme/koyuki_crying.gif" width="250"><br>
+  Waaahhhhhhh!
 </p>
 
 ## Disclaimer
