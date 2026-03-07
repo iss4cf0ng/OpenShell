@@ -72,6 +72,15 @@ func (sm *SessionManager) ListSessions() []Session {
 	return list;
 }
 
+func (sm *SessionManager) DeleteSession(id string) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+
+	delete(sm.sessions, id)
+
+	fmt.Println("Session removed:", id)
+}
+
 func (sm *SessionManager) CreateLocalShell(conn *websocket.Conn) (*ShellSession, error) {
 
 	sm.mu.Lock()
@@ -127,6 +136,7 @@ func (s *ShellSession) bridgePTY() {
 		for {
 			_, msg, err := s.Conn.ReadMessage()
 			if err != nil {
+				s.close()
 				return
 			}
 			s.Pty.Write(msg)
@@ -138,6 +148,7 @@ func (s *ShellSession) bridgePTY() {
 	for {
 		n, err := s.Pty.Read(buf)
 		if err != nil {
+			s.close()
 			return
 		}
 
@@ -151,6 +162,7 @@ func (s *ShellSession) bridgeReverse() {
 		for {
 			_, msg, err := s.Conn.ReadMessage()
 			if err != nil {
+				s.close()
 				return
 			}
 
@@ -161,12 +173,36 @@ func (s *ShellSession) bridgeReverse() {
 	buf := make([]byte, 1024)
 
 	for {
-
 		n, err := s.Net.Read(buf)
 		if err != nil {
+			s.close()
 			return
 		}
 
-		s.Conn.WriteMessage(websocket.TextMessage, buf[:n])
+		err = s.Conn.WriteMessage(websocket.TextMessage, buf[:n])
+		if err != nil {
+			s.close()
+			return
+		}
 	}
+}
+
+func (s *ShellSession) close() {
+	if s.Pty != nil {
+		s.Pty.Close()
+	}
+
+	if s.Cmd != nil && s.Cmd.Process != nil {
+		s.Cmd.Process.Kill()
+	}
+
+	if s.Net != nil {
+		s.Net.Close()
+	}
+
+	if s.Conn != nil {
+		s.Conn.Close()
+	}
+
+	manager.DeleteSession(s.ID)
 }

