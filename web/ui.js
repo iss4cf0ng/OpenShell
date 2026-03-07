@@ -16,7 +16,6 @@ function addSession(id, ip, type){
 }
 
 function openTerminal(id){
-
     if(terminals[id]){
         activateTab(id)
         return
@@ -24,8 +23,16 @@ function openTerminal(id){
 
     const tab=document.createElement("div")
     tab.className="tab"
-    tab.innerText=id
-    tab.onclick=()=>activateTab(id)
+
+    const label=document.createElement("span")
+    label.innerText=id
+
+    const close=document.createElement("span")
+    close.innerText="✕"
+    close.className="tab-close"
+
+    tab.appendChild(label)
+    tab.appendChild(close)
 
     tabs.appendChild(tab)
 
@@ -41,18 +48,22 @@ function openTerminal(id){
 
     term.open(termDiv)
 
-    term.write("Connected to "+id+"\r\n")
+    const proto = location.protocol === "https:" ? "wss://" : "ws://"
 
-    /* websocket */
+    const ws = new WebSocket(proto + location.host + "/ws/session?id=" + id)
 
-    const ws = new WebSocket(`ws://${location.host}/ws/session?id=${id}`)
-
-    ws.onmessage = function(e){
+    ws.onmessage = e=>{
         term.write(e.data)
     }
 
-    term.onData(function(data){
-        ws.send(data)
+    ws.onopen = ()=>{
+        term.focus()
+    }
+
+    term.onData(data=>{
+        if(ws.readyState === 1){
+            ws.send(data)
+        }
     })
 
     terminals[id]={
@@ -60,6 +71,13 @@ function openTerminal(id){
         term,
         termDiv,
         ws
+    }
+
+    tab.onclick=()=>activateTab(id)
+
+    close.onclick=(e)=>{
+        e.stopPropagation()
+        closeTab(id)
     }
 
     activateTab(id)
@@ -77,8 +95,24 @@ function activateTab(id){
 
     const t=terminals[id]
 
+    if(!t) return
+
     t.tab.classList.add("active")
     t.termDiv.style.display="block"
+}
+
+function closeTab(id){
+
+    const t=terminals[id]
+
+    if(!t) return
+
+    t.ws.close()
+
+    t.tab.remove()
+    t.termDiv.remove()
+
+    delete terminals[id]
 }
 
 function loadSessions(){

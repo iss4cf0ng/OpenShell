@@ -1,9 +1,12 @@
 package main
 
 import (
+    "fmt"
 	"log"
 	"net/http"
     "encoding/json"
+    "net"
+    "crypto/tls"
 
 	"github.com/gorilla/websocket"
 )
@@ -13,38 +16,6 @@ var upgrader = websocket.Upgrader{
 }
 
 var manager = NewSessionManager()
-
-/*
-func wsHandler(w http.ResponseWriter, r *http.Request) {
-
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	session := manager.GetLastReverseShell()
-
-	if session != nil {
-
-		session.Conn = conn
-
-		go session.bridgeReverse()
-
-		log.Println("Web attached to reverse shell:", session.ID)
-
-		return
-	}
-
-	localSession, err := manager.CreateLocalShell(conn)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	log.Println("New local shell:", localSession.ID)
-}
-*/
 
 func SessionHandler(w http.ResponseWriter, r *http.Request) {
     list := manager.ListSessions()
@@ -75,12 +46,44 @@ func AttachHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func StartTLSReverseShell(port string) {
+    cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
+	if err != nil {
+		panic(err)
+	}
+
+	config := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+	}
+
+	ln, err := tls.Listen("tcp", ":"+port, config)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("TLS reverse shell listener on", port)
+
+	for {
+
+		conn, err := ln.Accept()
+		if err != nil {
+			continue
+		}
+
+		go func(c net.Conn) {
+
+			manager.CreateReverseShell(c)
+
+		}(conn)
+	}
+}
+
 func main() {
 
 	// reverse shell listener
-	go StartReverseShellListener("4444")
+	go StartReverseShellListener("4444") //Normal TCP
+    go StartTLSReverseShell("4445") //TLS
 
-	//http.HandleFunc("/ws", wsHandler)
     http.HandleFunc("/api/sessions", SessionHandler)
     http.HandleFunc("/ws/session", AttachHandler)
 
