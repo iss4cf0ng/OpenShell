@@ -4,48 +4,66 @@
 <meta charset="utf-8">
 <title>OpenShell Console</title>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css">
+<link rel="stylesheet" href="https://unpkg.com/@xterm/xterm/css/xterm.css">
 
 <style>
-
 body{
     margin:0;
     background:#1e1e1e;
     color:white;
     font-family:Arial;
 }
-
 #container{
     display:flex;
     flex-direction:column;
     height:100vh;
 }
 
-/* session list */
+/* builder */
+#builderMenu{
+    display:flex;
+    background:#222;
+    padding:4px;
+    border-bottom:1px solid #333;
+}
+#builderMenu button{
+    margin-right:4px;
+    background:#333;
+    color:white;
+    border:none;
+    padding:4px 8px;
+    cursor:pointer;
+}
+#builderMenu button:hover{ background:#555; }
+#payloadbox{
+    flex:1;
+    margin-left:8px;
+    background:#111;
+    color:white;
+    border:none;
+    padding:4px;
+}
 
+/* session list */
 #sessions{
     height:200px;
     overflow:auto;
     border-bottom:1px solid #333;
 }
-
 #sessions table{
     width:100%;
     border-collapse:collapse;
 }
-
 #sessions th,#sessions td{
     padding:6px;
     border:1px solid #444;
     text-align:left;
 }
-
 #sessions th{
     background:#2a2a2a;
 }
 
 /* splitter */
-
 #splitter{
     height:5px;
     background:#555;
@@ -53,7 +71,6 @@ body{
 }
 
 /* terminal area */
-
 #terminalContainer{
     flex:1;
     display:flex;
@@ -61,14 +78,12 @@ body{
 }
 
 /* tabs */
-
 #tabs{
     height:32px;
     display:flex;
     background:#222;
     border-bottom:1px solid #333;
 }
-
 .tab{
     display:flex;
     align-items:center;
@@ -77,71 +92,92 @@ body{
     border-right:1px solid #333;
     background:#222;
 }
-
-.tab.active{
-    background:#444;
-}
-
+.tab.active{ background:#444; }
 .tab-close{
     margin-left:8px;
     color:#aaa;
     cursor:pointer;
 }
-
-.tab-close:hover{
-    color:white;
-}
+.tab-close:hover{ color:white; }
 
 /* terminal */
-
 #terminalArea{
     flex:1;
     position:relative;
 }
-
 .terminal{
     position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
+    top:0; left:0; right:0; bottom:0;
 }
 
+/* status bar */
+#statusBar{
+    height:24px;
+    background:#222;
+    border-top:1px solid #333;
+    display:flex;
+    align-items:center;
+    padding:0 8px;
+}
+
+/* login panel */
+#loginPanel{
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:rgba(0,0,0,0.8);
+}
+#loginPanel input{
+    padding:4px;
+    margin-right:4px;
+}
 </style>
-
 </head>
-
 <body>
 
 <div id="container">
 
-<div id="sessions">
-<h3>Sessions</h3>
+    <!-- Builder menu -->
+    <div id="builderMenu">
+        <button onclick="build('python')">Python</button>
+        <button onclick="build('bash')">Bash</button>
+        <button onclick="build('php')">PHP</button>
+        <button onclick="build('powershell')">Powershell</button>
+        <input id="payloadbox" readonly/>
+    </div>
 
-<table id="sessionTable">
-<tr>
-<th>ID</th>
-<th>IP</th>
-<th>Type</th>
-</tr>
-</table>
+    <!-- Session list -->
+    <div id="sessions">
+        <h3>Sessions</h3>
+        <table id="sessionTable">
+            <tr><th>ID</th><th>IP</th><th>Type</th></tr>
+        </table>
+    </div>
+
+    <div id="splitter"></div>
+
+    <div id="terminalContainer">
+        <div id="tabs"></div>
+        <div id="terminalArea"></div>
+    </div>
+
+    <!-- Status bar -->
+    <div id="statusBar">
+        Online Machines: <span id="online">0</span>
+    </div>
 
 </div>
 
-<div id="splitter"></div>
-
-<div id="terminalContainer">
-
-<div id="tabs"></div>
-
-<div id="terminalArea"></div>
-
+<!-- Login panel -->
+<div id="loginPanel">
+    <input type="password" id="password" placeholder="Enter password"/>
+    <button onclick="login()">Login</button>
 </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+<script src="https://unpkg.com/@xterm/xterm/lib/xterm.js"></script>
+<script src="https://unpkg.com/@xterm/addon-fit/lib/addon-fit.js"></script>
 <script src="ui.js"></script>
-
 </body>
 </html>

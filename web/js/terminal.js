@@ -1,37 +1,13 @@
-const term = new Terminal();
-term.open(document.getElementById("terminal"));
+var term = new Terminal()
 
-const tabs = document.getElementById("tabs");
-const shellTypeSelect = document.getElementById("shellType");
+term.open(document.getElementById("terminal"))
 
-let currentWS = null;
+var ws = new WebSocket("ws://localhost:8080/ws")
 
-function createSession(shellType) {
-    const ws = new WebSocket(`ws://${location.host}/ws`);
-    ws.onopen = () => {
-        ws.send(shellType);
-    };
-
-    ws.onmessage = (event) => {
-        term.write(event.data);
-    };
-
-    ws.onclose = () => {
-        term.write("\r\n*** Disconnected ***\r\n");
-    };
-
-    const tab = document.createElement("div");
-    tab.className = "tab";
-    tab.textContent = shellType;
-    tab.onclick = () => {
-        currentWS = ws;
-        term.clear();
-    };
-    tabs.appendChild(tab);
-
-    currentWS = ws;
+ws.onmessage = function(event){
+    term.write(event.data)
 }
 
-document.getElementById("newSession").onclick = () => {
-    createSession(shellTypeSelect.value);
-};
+term.onData(function(data){
+    ws.send(data)
+})

@@ -36,6 +36,14 @@ type SessionManager struct {
 	counter  int
 }
 
+func (sm *SessionManager) Count() int {
+
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+
+	return len(sm.sessions)
+}
+
 func NewSessionManager() *SessionManager {
 	return &SessionManager{
 		sessions: make(map[string]*ShellSession),
