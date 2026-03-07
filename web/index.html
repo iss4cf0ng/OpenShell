@@ -239,9 +239,30 @@ body{
 </div>
 
 <!-- Login panel -->
-<div id="loginPanel">
-    <input type="password" id="password" placeholder="Enter password"/>
-    <button onclick="login()">Login</button>
+<div id="loginPanel" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background-color:black;">
+  <div style="text-align:center; width:400px; color:white; font-family:sans-serif;">
+    
+    <!-- Logo -->
+    <img src="logo.png" style="width:80px; height:80px; margin-bottom:20px;">
+    
+    <!-- Tool info -->
+    <div style="margin-bottom:20px;">
+      <h2 style="margin:0;">OpenShellServer</h2>
+      <p style="margin:10px 0; font-size:18px;">Author: <a href="https://github.com/iss4cf0ng/" target="_blank" style="color:#00bfff; text-decoration:none;">ISSAC</a></p>
+      <a href="https://github.com/iss4cf0ng/OpenShellServer" target="_blank" style="color:#00bfff; text-decoration:none;">GitHub Repository</a>
+    </div>
+    
+    <!-- Password input -->
+    <input id="password" type="password" placeholder="Password"
+      style="width:92%; padding:15px; font-size:18px; background-color:#111; color:white; border:none; border-radius:5px; margin-bottom:20px;">
+
+    <!-- Login button -->
+    <button onclick="login()"
+      style="width:100%; padding:15px; font-size:18px; background-color:#111; color:white; border:none; border-radius:5px; cursor:pointer;">
+      Login
+    </button>
+
+  </div>
 </div>
 
 <script src="https://unpkg.com/@xterm/xterm/lib/xterm.js"></script>

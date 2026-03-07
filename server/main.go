@@ -31,6 +31,7 @@ func loginHandler(w http.ResponseWriter,r *http.Request){
     http.Error(w,"Wrong password",401)
 }
 
+//Build a reverse shell command.
 func builderHandler(w http.ResponseWriter, r *http.Request) {
 
     lang := r.URL.Query().Get("lang")
