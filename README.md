@@ -34,35 +34,56 @@ Download the lastest release:
 ```
 $ wget https://github.com/iss4cf0ng/OpenShell/releases/latest/download/openshell-server-linux-amd64.tar.gz
 $ tar -xzf openshell-server-linux-amd64.tar.gz
-$./openshell-server
+$ ./openshell-server
 ```
+
+## Quick Start
+1. Start the server
+```
+$ ./openshell-server
+```
+2. Open your browser and navigate to:
+```
+http://localhost:8080
+```
+3. Login using the default password:
+```
+123456
+```
+4. Generate a reverse shell command and execute it on the target machine.
+5. Have fun!
+
+## Architecture
 
 ## Acknowledgement
 - [Reverse Shell Cheatsheet (by swisskyrepo)](https://swisskyrepo.github.io/InternalAllTheThings/cheatsheets/shell-reverse-cheatsheet/)
 
-# ScreenShot
-## Login (Default Password: `123456`)
+## ScreenShot
+### Server
+
+
+### Login (Default Password: `123456`)
 <p align="center">
   <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/2.png" width=700>
 </p>
 
-## Create Reverse Shell Command
+### Create Reverse Shell Command
 <p align="center">
   <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/3.png" width=400>
 </p>
 
-# Sessions
+### Sessions
 <p align="center">
   <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/4.png" width=800>
 </p>
 
-## Interactive Reverse Shell (capable to use `vim`, `ssh`, `nano`, `nslookup`, `nc`, etc.)
-### `vim`
+### Interactive Reverse Shell (capable to use `vim`, `ssh`, `nano`, `nslookup`, `nc`, etc.)
+#### `vim`
 <p align="center">
   <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/1.png" width=1000>
 </p>
 
-### `nslookup`
+#### `nslookup`
 <p align="center">
   <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/5.png" width=1000>
 </p>
