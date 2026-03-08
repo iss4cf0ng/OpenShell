@@ -109,8 +109,8 @@ function openTerminal(id){
     term.open(termDiv)
     fitAddon.fit()
 
-    const proto = location.protocol === "https:" ? "wss://" : "ws://"
-    const ws = new WebSocket(proto + location.host + "/ws/session?id=" + id)
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${proto}://${location.host}/ws/session?id=${id}`);
 
     ws.onopen = ()=>term.focus()
     ws.onmessage = e=>term.write(e.data)

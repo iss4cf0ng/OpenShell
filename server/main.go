@@ -49,6 +49,10 @@ var sessions = struct {
 type LoginReq struct{ Password string `json:"password"` }
 
 func getWebPath() string {
+    if _, err := os.Stat("web"); err == nil {
+        return "web"
+    }
+
     exe, err := os.Executable()
     if err != nil {
         return "web"
@@ -255,10 +259,30 @@ func main(){
     fs := http.FileServer(http.Dir(webPath))
     http.Handle("/", fs)
 
-    logger.Success("OpenShell server running on: %d", *port)
+    httpsPort := *port
+    httpPort := httpsPort + 1
 
-    err := http.ListenAndServe(":"+strconv.Itoa(*port), nil)
+    logger.Success("HTTPS server running on: %d", httpsPort)
+    logger.Info("HTTP redirect on: %d -> %d", httpPort, httpsPort)
+
+    go func() {
+        err := http.ListenAndServe(":"+strconv.Itoa(httpPort), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            target := "https://" + r.Host + r.URL.RequestURI()
+            http.Redirect(w, r, target, http.StatusMovedPermanently)
+        }))
+        if err != nil {
+            logger.Error("HTTP redirect failed: %v", err)
+        }
+    }()
+
+    err := http.ListenAndServeTLS(
+        ":"+strconv.Itoa(httpsPort),
+        "cert.pem",
+        "key.pem",
+        nil,
+    )
+
     if err != nil {
-        logger.Error("HTTP server failed: %v", err)
+        logger.Error("HTTPS server failed: %v", err)
     }
 }
