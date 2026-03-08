@@ -78,7 +78,7 @@ OpenShell consists of two main components:
   - Supports multiple terminal tabs
 
 <p align="center">
-  <img src="/images/article/2026-3-8-OpenShell/architecture.png" width=800>
+  <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/architecture.png" width=800>
 </p>
 
 ## Tech Stack
