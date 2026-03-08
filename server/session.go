@@ -80,7 +80,7 @@ func (sm *SessionManager) DeleteSession(id string) {
 
 	delete(sm.sessions, id)
 
-	logger.Info("[*] Session removed: %s", id)
+	logger.Info("Session removed: %s", id)
 }
 
 func (sm *SessionManager) CreateLocalShell(conn *websocket.Conn) (*ShellSession, error) {
@@ -128,7 +128,7 @@ func (sm *SessionManager) CreateReverseShell(netConn net.Conn) {
 
 	sm.sessions[id] = session
 
-	logger.Success("[+] New reverse shell: %s %s", id, netConn.RemoteAddr())
+	logger.Success("New reverse shell: %s %s", id, netConn.RemoteAddr())
 
 }
 

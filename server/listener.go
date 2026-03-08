@@ -15,7 +15,7 @@ func StartReverseShell(port string) {
 		panic(err)
 	}
 
-	logger.Info("[*] Reverse shell listener on port: %s", port)
+	logger.Info("Reverse shell listener on port: %s", port)
 
 	for {
 
@@ -44,7 +44,7 @@ func StartTLSReverseShell(port string) {
 		panic(err)
 	}
 
-	logger.Info("[*] TLS reverse shell listener on: %s", port)
+	logger.Info("TLS reverse shell listener on: %s", port)
 
 	for {
 

