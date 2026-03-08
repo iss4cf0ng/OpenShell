@@ -56,7 +56,7 @@ $ ./openshell-server
 ```
 3. Open your browser and navigate to:
 ```
-http://localhost:8080
+https://localhost:8080
 ```
 4. Login using the default password (Please change it in production):
 ```
@@ -76,6 +76,10 @@ OpenShell consists of two main components:
   - Built with xterm.js
   - Allows interactive shell sessions in browser
   - Supports multiple terminal tabs
+
+<p align="center">
+  <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/architecture.png" width=800>
+</p>
 
 ## Tech Stack
 - Go
