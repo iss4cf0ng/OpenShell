@@ -38,7 +38,7 @@ Additional features may be added in the future.
 - Designed for learning and research purposes
 
 ## Acknowledgement
-- [Reverse Shell Cheatsheet](https://swisskyrepo.github.io/InternalAllTheThings/cheatsheets/shell-reverse-cheatsheet/)
+- [Reverse Shell Cheatsheet (by swisskyrepo)](https://swisskyrepo.github.io/InternalAllTheThings/cheatsheets/shell-reverse-cheatsheet/)
 
 # ScreenShot
 <p align="center">
