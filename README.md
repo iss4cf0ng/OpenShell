@@ -37,6 +37,11 @@ Additional features may be added in the future.
 - Designed for learning and research purposes
 
 ## Installation
+Create `key.pem` and `cert.pem`:
+```
+$ openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
+```
+
 Download the lastest release:
 ```
 $ wget https://github.com/iss4cf0ng/OpenShell/releases/latest/download/openshell-server-linux-amd64.tar.gz
