@@ -2,7 +2,7 @@
 
 set -e
 
-APP=openssh-server
+APP=openshell-server
 VERSION=v1.0.0
 
 rm -rf dist

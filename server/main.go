@@ -13,6 +13,7 @@ import (
     "crypto/rand"
     "encoding/hex"
     "encoding/json"
+    "path/filepath"
 
     "openshell/internal/logger"
 
@@ -46,6 +47,16 @@ var sessions = struct {
 }{m: make(map[string]bool)}
 
 type LoginReq struct{ Password string `json:"password"` }
+
+func getWebPath() string {
+    exe, err := os.Executable()
+    if err != nil {
+        return "web"
+    }
+
+    exeDir := filepath.Dir(exe)
+    return filepath.Join(exeDir, "web")
+}
 
 //Middleware for authentication
 func requireAuth(next http.HandlerFunc) http.HandlerFunc {
@@ -194,7 +205,7 @@ func main(){
         flag.PrintDefaults()
         fmt.Println()
         fmt.Println("Example:")
-        fmt.Printf(" %s -port=8080 -port=8080 -port-tcp=4444 -port-tls=5555", os.Args[0])
+        fmt.Printf(" %s -port=8080 -port=8080 -port-tcp=4444 -port-tls=5555\n", os.Args[0])
     }
 
     flag.Parse()
@@ -238,7 +249,10 @@ func main(){
     http.HandleFunc("/api/sessions", requireAuth(sessionsHandler))  //Obtain sessions
     http.HandleFunc("/ws/session", requireAuth(attachHandler))      //Buffer handler
 
-    fs := http.FileServer(http.Dir("../web"))
+    webPath := getWebPath()
+    logger.Info("Serving web files from: %s", webPath)
+
+    fs := http.FileServer(http.Dir(webPath))
     http.Handle("/", fs)
 
     logger.Success("OpenShell server running on: %d", *port)
