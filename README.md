@@ -37,11 +37,6 @@ Additional features may be added in the future.
 - Designed for learning and research purposes
 
 ## Installation
-Create `key.pem` and `cert.pem`:
-```
-$ openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
-```
-
 Download the lastest release:
 ```
 $ wget https://github.com/iss4cf0ng/OpenShell/releases/latest/download/openshell-server-linux-amd64.tar.gz
@@ -50,20 +45,25 @@ $ ./openshell-server
 ```
 
 ## Quick Start
-1. Start the server
+1. Create `key.pem` and `cert.pem`:
+```
+$ openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
+```
+
+2. Start the server
 ```
 $ ./openshell-server
 ```
-2. Open your browser and navigate to:
+3. Open your browser and navigate to:
 ```
 http://localhost:8080
 ```
-3. Login using the default password (Please change it in production):
+4. Login using the default password (Please change it in production):
 ```
 123456
 ```
-4. Generate a reverse shell command and execute it on the target machine.
-5. Have fun!
+5. Generate a reverse shell command and execute it on the target machine.
+6. Have fun!
 
 ## Architecture
 OpenShell consists of two main components:
