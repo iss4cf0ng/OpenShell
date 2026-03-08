@@ -1,20 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"crypto/tls"
+
+	"openshell/internal/logger"
 )
 
 //TCP listener
-func StartReverseShellListener(port string) {
+func StartReverseShell(port string) {
 
 	ln, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("[*] Reverse shell listener on port", port)
+	logger.Info("[*] Reverse shell listener on port: %s", port)
 
 	for {
 
@@ -38,12 +39,12 @@ func StartTLSReverseShell(port string) {
 		Certificates: []tls.Certificate{cert},
 	}
 
-	ln, err := tls.Listen("tcp", ":"+port, config)
+	ln, err := tls.Listen("tcp", ":" + port, config)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("[*] TLS reverse shell listener on", port)
+	logger.Info("[*] TLS reverse shell listener on: %s", port)
 
 	for {
 

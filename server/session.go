@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"sync"
 
+	"openshell/internal/logger"
+
 	"github.com/creack/pty"
 	"github.com/gorilla/websocket"
 )
@@ -78,7 +80,7 @@ func (sm *SessionManager) DeleteSession(id string) {
 
 	delete(sm.sessions, id)
 
-	fmt.Println("[*] Session removed:", id)
+	logger.Info("[*] Session removed: %s", id)
 }
 
 func (sm *SessionManager) CreateLocalShell(conn *websocket.Conn) (*ShellSession, error) {
@@ -126,7 +128,7 @@ func (sm *SessionManager) CreateReverseShell(netConn net.Conn) {
 
 	sm.sessions[id] = session
 
-	fmt.Println("[+] New reverse shell:", id, netConn.RemoteAddr())
+	logger.Success("[+] New reverse shell: %s %s", id, netConn.RemoteAddr())
 
 }
 

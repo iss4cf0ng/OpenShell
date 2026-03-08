@@ -1,4 +1,4 @@
-module openshellserver
+module openshell
 
 go 1.18
 

@@ -1,23 +1,38 @@
 package main
 
 import (
+    "fmt"
+    "os"
+    "flag" //arguments
+    "io"
+    "net/http"
+    "strconv"
+
     "crypto/sha256"
     "encoding/hex"
     "encoding/json"
-    "fmt"
-    "io"
-    "log"
-    "net/http"
+
+    "openshell/internal/logger"
 
     "github.com/gorilla/websocket"
 )
 
 var banner = `
-Project: OpenShellServer
-Version: 1.0.0
-Author: iss4cf0ng/ISSAC
-GitHub: https://github.com/iss4cf0ng/OpenShellServer/
+  ░██████                                      ░██████   ░██                   ░██ ░██ 
+ ░██   ░██                                    ░██   ░██  ░██                   ░██ ░██ 
+░██     ░██ ░████████   ░███████  ░████████  ░██         ░████████   ░███████  ░██ ░██ 
+░██     ░██ ░██    ░██ ░██    ░██ ░██    ░██  ░████████  ░██    ░██ ░██    ░██ ░██ ░██ 
+░██     ░██ ░██    ░██ ░█████████ ░██    ░██         ░██ ░██    ░██ ░█████████ ░██ ░██ 
+ ░██   ░██  ░███   ░██ ░██        ░██    ░██  ░██   ░██  ░██    ░██ ░██        ░██ ░██ 
+  ░██████   ░██░█████   ░███████  ░██    ░██   ░██████   ░██    ░██  ░███████  ░██ ░██ 
+            ░██                                                                        
+            ░██                                                                        
+                                                        
 `
+
+var version = "1.0.0"
+var author = "iss4cf0ng/ISSAC"
+var repo = "https://github.com/iss4cf0ng/OpenShell"
 
 var manager = NewSessionManager()
 var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
@@ -100,11 +115,62 @@ func attachHandler(w http.ResponseWriter,r *http.Request){
     if s.Pty!=nil{ go s.bridgePTY() }
 }
 
+func validatePort(port int) bool {
+    return port > 0 && port <= 65535
+}
+
 func main(){
     fmt.Println(banner)
 
-    go StartReverseShellListener("4444")  //Normal TCP
-    go StartTLSReverseShell("4445")       //TLS
+    port := flag.Int("port", 8080, "Web server port")
+    port_tcp := flag.Int("port-tcp", 4444, "TCP listener port")
+    port_tls := flag.Int("port-tls", 5555, "TLS listener port")
+
+    showVersion := flag.Bool("version", false, "Show version info")
+
+    flag.Usage = func() {
+        fmt.Fprintf(os.Stderr, "Usage: %s [options]\n", os.Args[0])
+        fmt.Println()
+        fmt.Println("Options:")
+        flag.PrintDefaults()
+        fmt.Println()
+        fmt.Println("Example:")
+        fmt.Printf(" %s -port=8080 -port=8080 -port-tcp=4444 -port-tls=5555", os.Args[0])
+    }
+
+    flag.Parse()
+
+    if *showVersion {
+        logger.Info("Version: %s", version)
+		logger.Info("Author: %s", author)
+		logger.Info("GitHub: %s", repo)
+
+        return
+    }
+
+    logger.Info("Validating port numbers...")
+    if !validatePort(*port) {
+        logger.Error("Invalid web port: %d (must be 1-65535)", *port)
+        os.Exit(1)
+    }
+
+    if !validatePort(*port_tcp) {
+        logger.Error("Invalid TCP port: %d (must be 1-65535)", *port_tcp)
+        os.Exit(1)
+    }
+
+    if !validatePort(*port_tls) {
+        logger.Error("Invalid TLS port: %d (must be 1-65535)", *port_tls)
+        os.Exit(1)
+    }
+    
+    logger.Info("Starting OpenShell server")
+    logger.Info("Web UI: %d", *port)
+    logger.Info("TCP listener: %d", *port_tcp)
+    logger.Info("TLS listener: %d", *port_tls)
+
+    go StartReverseShell(strconv.Itoa(*port_tcp))  //Normal TCP
+    go StartTLSReverseShell(strconv.Itoa(*port_tls))       //TLS
 
     http.HandleFunc("/api/login",loginHandler)        //Login authentication
 
@@ -116,6 +182,10 @@ func main(){
     fs := http.FileServer(http.Dir("../web"))
     http.Handle("/",fs)
 
-    log.Println("[*] OpenShellServer running at :8080")
-    log.Fatal(http.ListenAndServe(":8080",nil))
+    logger.Success("OpenShell server running on: %d", *port)
+
+    err := http.ListenAndServe(":"+strconv.Itoa(*port), nil)
+    if err != nil {
+        logger.Error("HTTP server failed: %v", err)
+    }
 }
