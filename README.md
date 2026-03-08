@@ -77,6 +77,10 @@ OpenShell consists of two main components:
   - Allows interactive shell sessions in browser
   - Supports multiple terminal tabs
 
+<p align="center">
+  <img src="/images/article/2026-3-8-OpenShell/architecture.png" width=800>
+</p>
+
 ## Tech Stack
 - Go
 - WebSocket
