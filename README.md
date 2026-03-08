@@ -56,7 +56,7 @@ $ ./openshell-server
 ```
 3. Open your browser and navigate to:
 ```
-http://localhost:8080
+https://localhost:8080
 ```
 4. Login using the default password (Please change it in production):
 ```
