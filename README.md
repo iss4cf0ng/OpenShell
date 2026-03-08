@@ -32,9 +32,9 @@ Additional features may be added in the future.
 ## Installation
 Download the lastest release:
 ```
-$ wget https](https://github.com/iss4cf0ng/OpenShellServer/releases/latest/download/openshell-server-linux-amd64.tar.gz
+$ wget https://github.com/iss4cf0ng/OpenShell/releases/latest/download/openshell-server-linux-amd64.tar.gz
 $ tar -xzf openshell-server-linux-amd64.tar.gz
-$./openshell-server)
+$./openshell-server
 ```
 
 ## Acknowledgement
