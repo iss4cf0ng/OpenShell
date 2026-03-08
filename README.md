@@ -85,9 +85,6 @@ Future improvements may include:
 - Session persistence
 - Authentication improvements
 
-## Acknowledgement
-- [Reverse Shell Cheatsheet (by swisskyrepo)](https://swisskyrepo.github.io/InternalAllTheThings/cheatsheets/shell-reverse-cheatsheet/)
-
 ## ScreenShot
 ### Server
 <p align="center">
@@ -122,3 +119,7 @@ Future improvements may include:
 
 ## License
 This project is licensed under the MIT License.
+
+## Acknowledgement
+- [Reverse Shell Cheatsheet (by swisskyrepo)](https://swisskyrepo.github.io/InternalAllTheThings/cheatsheets/shell-reverse-cheatsheet/)
+
