@@ -1,8 +1,9 @@
 # OpenShell
 
-![status](https://img.shields.io/badge/status-development-orange)
+![status](https://img.shields.io/badge/status-maintenance-orange)
 ![language](https://img.shields.io/badge/language-Go-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
+![release](https://img.shields.io/github/v/release/iss4cf0ng/OpenShell)
 
 OpenShell is a lightweight, open-source reverse shell management server written in Go.  
 It allows users to establish reverse shell channels and interact with them through a simple web-based graphical user interface (GUI).
