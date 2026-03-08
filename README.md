@@ -7,21 +7,14 @@
 OpenShell is a lightweight, open-source reverse shell management server written in Go.  
 It allows users to establish reverse shell channels and interact with them through a simple web-based graphical user interface (GUI).
 
-## Project Status
-
-⚠️ This project is currently under development. The first release is coming soon. Installation instructions will be provided after the first release.
+## Disclaimer
+This project was developed as part of my personal interest in studying cybersecurity. However, it may potentially be misused for malicious purposes.  
+Please do NOT use this tool for any illegal activities.  
+The author is not responsible for any misuse of this software.
 
 <p align="center">
-  <img src="https://iss4cf0ng.github.io/images/meme/koyuki_crying.gif" width="250"><br>
-  Waaahhhhhhh!
+  <img src="https://iss4cf0ng.github.io/images/meme/mika_punch.jpg" width="500">
 </p>
-
-## Disclaimer
-
-This project was developed purely for cybersecurity research and educational purposes.  
-It must not be used for illegal or unauthorized activities.
-
-The author is not responsible for any misuse or damage caused by this software.
 
 ## Background
 
@@ -31,16 +24,45 @@ Compared to Eden-RAT, OpenShell focuses only on establishing reverse shell chann
 Additional features may be added in the future.
 
 ## Features
-
 - Lightweight reverse shell server written in Go
 - Web-based GUI for interactive shell sessions
 - Simple reverse shell command to connect
 - Designed for learning and research purposes
 
+## Installation
+Download the lastest release:
+```
+$ wget https](https://github.com/iss4cf0ng/OpenShellServer/releases/latest/download/openshell-server-linux-amd64.tar.gz
+$ tar -xzf openshell-server-linux-amd64.tar.gz
+$./openshell-server)
+```
+
 ## Acknowledgement
 - [Reverse Shell Cheatsheet (by swisskyrepo)](https://swisskyrepo.github.io/InternalAllTheThings/cheatsheets/shell-reverse-cheatsheet/)
 
 # ScreenShot
+## Login (Default Password: `123456`)
+<p align="center">
+  <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/2.png" width=700>
+</p>
+
+## Create Reverse Shell Command
+<p align="center">
+  <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/3.png" width=400>
+</p>
+
+# Sessions
+<p align="center">
+  <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/4.png" width=800>
+</p>
+
+## Interactive Reverse Shell (capable to use `vim`, `ssh`, `nano`, `nslookup`, `nc`, etc.)
+### `vim`
 <p align="center">
   <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/1.png" width=1000>
+</p>
+
+### `nslookup`
+<p align="center">
+  <img src="https://iss4cf0ng.github.io/images/article/2026-3-8-OpenShell/5.png" width=1000>
 </p>
