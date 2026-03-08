@@ -137,26 +137,17 @@ func (s *ShellSession) attachWebSocket(conn *websocket.Conn) {
     s.Conn = conn
     s.mu.Unlock()
 
-    s.Pty.Write([]byte("\n"))
-
     go func() {
-        buf := make([]byte, 1024)
         for {
-            n, err := s.Pty.Read(buf)
-            if err != nil {
-                s.closePTYOnly()
+            select {
+            case data, ok := <-s.OutBuf:
+                if !ok {
+                    return
+                }
+                conn.WriteMessage(websocket.TextMessage, data)
+            default:
                 return
             }
-            s.mu.Lock()
-            if s.Conn != nil {
-                conn.WriteMessage(websocket.TextMessage, buf[:n])
-            } else {
-                select {
-                case s.OutBuf <- buf[:n]:
-                default:
-                }
-            }
-            s.mu.Unlock()
         }
     }()
 

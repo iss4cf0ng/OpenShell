@@ -128,6 +128,8 @@ function openTerminal(id){
     close.onclick=(e)=>{ e.stopPropagation(); closeTab(id) }
 
     activateTab(id)
+
+    term.write('=== Shell Session ===\n\rWelcome!\n\rPress [ENTER] to use openshell.\n\r');
 }
 
 function activateTab(id){
