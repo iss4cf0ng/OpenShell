@@ -10,7 +10,7 @@ It allows users to establish reverse shell channels and interact with them throu
 
 If you encounter bugs or have suggestions, feel free to open an issue.
 
-If you find this project useful or informative, a ⭐ on the repository would be greatly appreciated!
+If you find this project useful or informative, a ⭐ on the repository would be greatly appreciated! Your support would be a great motivation for me to continue improving this tool.
 
 <p align="center">
 <img src="https://iss4cf0ng.github.io/images/meme/nagisa_neko.png" width=200>
